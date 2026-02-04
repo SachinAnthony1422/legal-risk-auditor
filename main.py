@@ -137,7 +137,7 @@ def show_landing_page():
     st.markdown("<br><br><br>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align: center; color: #94a3b8; font-size: 0.8rem;">
-    Developed by <b>Sachin Anthony</b> for HCL GUVI Hackathon 2026
+    Developed by <b>SACHIN S</b> for HCL GUVI Hackathon 2026
     </div>
     """, unsafe_allow_html=True)
 
