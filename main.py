@@ -1,4 +1,12 @@
 import streamlit as st
+# --- MAGIC FIX FOR SPACY MODEL ---
+import os
+import spacy.cli
+try:
+    spacy.load("en_core_web_sm")
+except OSError:
+    print("Downloading language model...")
+    spacy.cli.download("en_core_web_sm")
 import time
 import google.generativeai as genai
 import os
