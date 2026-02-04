@@ -145,7 +145,9 @@ def main():
         
         st.markdown("---")
         st.info("✅ **System Status:** Online\n\n✅ **Encryption:** AES-256\n\n✅ **Model:** Gemini 2.5 Flash")
-
+        
+        st.sidebar.markdown("---")
+        st.sidebar.caption("👨‍💻 Developed by **Sachin S** for HCL GUVI Hackathon")
     # TABS
     tab1, tab2, tab3 = st.tabs(["📊 Audit Dashboard", "🤖 Legal Chat Assistant", "📝 Contract Drafter"])
 
