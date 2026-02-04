@@ -277,7 +277,7 @@ with st.sidebar:
         """, unsafe_allow_html=True)
     
     st.sidebar.markdown("---")
-    st.sidebar.caption("👨‍💻 Developed by **Sachin Anthony** for HCL GUVI Hackathon")
+    st.sidebar.caption("👨‍💻 Developed by **SACHIN S** for HCL GUVI Hackathon")
 
     if st.button("⬅️ Log Out"):
         st.session_state.page = 'landing'
