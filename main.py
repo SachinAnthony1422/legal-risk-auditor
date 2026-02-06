@@ -33,12 +33,19 @@ if 'page' not in st.session_state:
 
 # --- 3. LANDING PAGE DESIGN (Advanced UI/UX) ---
 def show_landing_page():
-    # Custom CSS for a SaaS-like look
+    # Custom CSS for a SaaS-like look + ANIMATED BACKGROUND
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
         
         html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+        
+        /* TECH GRID BACKGROUND */
+        [data-testid="stAppViewContainer"] {
+            background-color: #f8fafc;
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
         
         .main-title { 
             font-size: 4rem; 
@@ -59,7 +66,8 @@ def show_landing_page():
         }
         
         .feature-card { 
-            background: white; 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px);
             padding: 25px; 
             border-radius: 16px; 
             border: 1px solid #E2E8F0;
@@ -75,9 +83,11 @@ def show_landing_page():
         /* Button Animation */
         div.stButton > button {
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
         }
         div.stButton > button:hover {
             transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.6);
         }
         </style>
     """, unsafe_allow_html=True)
@@ -102,7 +112,7 @@ def show_landing_page():
     with col2:
         # Professional Hero Image (UPDATED TO LOCAL FILE)
         st.image("banner.png", use_container_width=True)
-        
+
     st.markdown("---")
 
     # --- FEATURES GRID ---
@@ -188,6 +198,11 @@ def anonymize_text(text):
 # Custom CSS for App Mode
 st.markdown("""
     <style>
+    /* SOFT BLUE BACKGROUND FOR APP */
+    [data-testid="stAppViewContainer"] {
+        background-color: #F8FAFC;
+    }
+    
     /* Glassmorphism Header */
     .main-header {
         background: rgba(255, 255, 255, 0.9);
@@ -199,6 +214,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: space-between;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     
     /* Metrics Cards */
@@ -228,7 +244,7 @@ st.markdown("""
         box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
     }
     .chat-ai { 
-        background-color: #F1F5F9; 
+        background-color: #ffffff; 
         color: #1E293B;
         padding: 14px 18px; 
         border-radius: 18px 18px 18px 0; 
@@ -236,6 +252,7 @@ st.markdown("""
         border: 1px solid #E2E8F0;
         float: left;
         max-width: 80%;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .chat-container { overflow: auto; display: flex; flex-direction: column; }
     
@@ -443,7 +460,7 @@ with tab3:
     st.caption("Generate legally binding agreements tailored for Indian Jurisdiction.")
     
     with st.container():
-        st.markdown("<div style='background: #F8FAFC; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
+        st.markdown("<div style='background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
             doc_type = st.selectbox("Document Type", ["NDA", "Employment Agreement", "Freelance Contract", "Lease Deed"])
