@@ -1,10 +1,23 @@
 import streamlit as st
 import time
-import google.generativeai as genai
 import os
 import plotly.graph_objects as go
 import re
 from dotenv import load_dotenv
+
+# --- AI LIBRARIES ---
+import google.generativeai as genai
+# Import OpenAI and Groq libraries. 
+# We use try-except to prevent crashes if libraries aren't installed yet.
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 
 # Import Custom Modules
 from core.document_parser import DocumentParser
@@ -12,14 +25,34 @@ from core.nlp_engine import LegalNLPEngine
 from core.risk_engine import LegalRiskEngine
 from utils.helpers import generate_pdf_report, generate_contract_pdf
 
-# Load Environment
+# Load Environment (For local .env file)
 load_dotenv()
-try:
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-except:
-    st.error("⚠️ Gemini API Key missing. Please check your .env file or Streamlit Secrets.")
 
-# --- 1. CONFIGURATION ---
+# --- 1. CONFIGURE AI CLIENTS ---
+# Google Setup
+try:
+    if os.getenv("GEMINI_API_KEY"):
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+except:
+    pass
+
+# OpenAI Setup
+openai_client = None
+if OpenAI and os.getenv("OPENAI_API_KEY"):
+    try:
+        openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    except:
+        pass
+
+# Groq Setup
+groq_client = None
+if Groq and os.getenv("GROQ_API_KEY"):
+    try:
+        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    except:
+        pass
+
+# --- 2. PAGE CONFIG ---
 st.set_page_config(
     page_title="LegalEagle AI | Enterprise Edition",
     page_icon="⚖️",
@@ -27,42 +60,61 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. ROBUST MODEL FALLBACK SYSTEM (OPTIMIZED FOR YOUR QUOTA) ---
-# Based on your dashboard image:
-# 1. Gemini 2.5 Flash Lite (Has capacity: 6/10)
-# 2. Gemini 3 Flash (Empty: 0/5) - Great backup
-# 3. Gemini 2.0 Flash Lite (Reliable backup)
-# 4. Gemini 2.5 Flash (Moved to bottom because it's full: 5/5)
+# --- 3. ULTIMATE HYBRID MODEL STRATEGY ---
+# Priority: High-Quota Gemini -> Free/Fast Groq -> Paid/Credit OpenAI -> Gemini Backups
 MODEL_PRIORITY = [
-    "gemini-2.5-flash-lite",      # Priority 1: Best available quota
-    "gemini-3-flash",             # Priority 2: New & Empty quota
-    "gemini-2.0-flash-lite",      # Priority 3: Fast backup
-    "gemini-1.5-flash",           # Priority 4: Old Reliable
-    "gemini-2.5-flash",           # Priority 5: Currently Full (Use as last resort)
-    "gemini-1.5-pro",             # Priority 6: Slower but smart
-    "gemini-pro"                  # Priority 7: Legacy
+    "gemini-2.5-flash-lite",      # 1. Google: High Quota & Fast
+    "gemini-3-flash",             # 2. Google: Backup (Unused Quota)
+    "llama3-70b-8192",            # 3. GROQ: Fast & Free Tier
+    "gpt-4o-mini",                # 4. OpenAI: Reliable & Cheap
+    "gemini-2.0-flash-lite",      # 5. Google: Stable Backup
+    "mixtral-8x7b-32768",         # 6. GROQ: Smart Backup
+    "gpt-4o",                     # 7. OpenAI: Heavy Duty Backup
+    "gemini-1.5-flash"            # 8. Google: Last Resort
 ]
 
 def generate_smart_fallback(prompt):
     """
-    Iterates through the model list until one works.
-    Includes a small delay to handle 'Busy' signals.
+    Tries Google, OpenAI, and Groq in order until one succeeds.
     """
     last_error = None
+    
     for model_name in MODEL_PRIORITY:
         try:
-            # st.toast(f"Attempting with {model_name}...", icon="🤖") # Uncomment for debugging
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
-            return response.text
+            # --- GOOGLE GEMINI LOGIC ---
+            if "gemini" in model_name:
+                if not os.getenv("GEMINI_API_KEY"): continue
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                return response.text
+
+            # --- GROQ LOGIC ---
+            elif "llama" in model_name or "mixtral" in model_name:
+                if not groq_client: continue
+                chat_completion = groq_client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model=model_name,
+                )
+                return chat_completion.choices[0].message.content
+
+            # --- OPENAI GPT LOGIC ---
+            elif "gpt" in model_name:
+                if not openai_client: continue
+                response = openai_client.chat.completions.create(
+                    model=model_name,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.7
+                )
+                return response.choices[0].message.content
+
         except Exception as e:
             last_error = e
-            time.sleep(0.5) # Brief pause to let API breathe
+            time.sleep(0.5) # Brief pause before switching providers
             continue 
     
-    return f"⚠️ System Busy. Please wait 10s. (Details: {str(last_error)})"
+    return f"⚠️ System Busy: All AI services (Google, OpenAI, Groq) are unreachable. (Error: {str(last_error)})"
 
-# --- 3. TRANSLATION DICTIONARY ---
+# --- 4. TRANSLATION DICTIONARY ---
 TRANSLATIONS = {
     "English": {
         "nav_audit": "📊 Audit Dashboard",
@@ -162,7 +214,7 @@ TRANSLATIONS = {
     }
 }
 
-# --- 4. SESSION STATE MANAGEMENT ---
+# --- 5. SESSION STATE MANAGEMENT ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
 if 'language' not in st.session_state:
@@ -173,7 +225,7 @@ def t(key):
     lang_dict = TRANSLATIONS.get(st.session_state.language, TRANSLATIONS["English"])
     return lang_dict.get(key, TRANSLATIONS["English"].get(key, key))
 
-# --- 5. LANDING PAGE DESIGN ---
+# --- 6. LANDING PAGE DESIGN ---
 def show_landing_page():
     st.markdown("""
         <style>
@@ -205,7 +257,7 @@ def show_landing_page():
     with col1:
         st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True) 
         st.markdown('<h1 class="main-title">Legal Intelligence <br>Reimagined.</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 2.5 Flash Lite</b>.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini, OpenAI & Groq</b>.</p>', unsafe_allow_html=True)
         
         if st.button("🚀 Launch Dashboard", type="primary"):
             with st.spinner("Initializing Secure Environment..."):
