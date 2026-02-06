@@ -27,30 +27,39 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. ROBUST MODEL FALLBACK SYSTEM ---
+# --- 2. ROBUST MODEL FALLBACK SYSTEM (THE "KITCHEN SINK" STRATEGY) ---
+# PRIORITY: We put "Lite" models first because your log shows they have available quota (2/10).
+# Standard "Flash" is at the bottom because it is currently full (5/5).
 MODEL_PRIORITY = [
-    "gemini-2.5-flash",       # Priority 1: The Cutting Edge (Fast & Smart)
-    "gemini-2.0-flash",       # Priority 2: Reliable Standard
-    "gemini-2.0-flash-lite",  # Priority 3: Ultra-Fast Backup
-    "gemini-2.5-pro",         # Priority 4: High Intelligence Backup
-    "gemini-pro-latest"       # Priority 5: Safety Net
+    "gemini-2.5-flash-lite",      # Priority 1: High Quota & Fast
+    "gemini-2.0-flash-lite",      # Priority 2: Backup Speedster
+    "gemini-2.0-flash-lite-001",  # Priority 3: Specific Version
+    "gemini-flash-lite-latest",   # Priority 4: Alias
+    "gemini-2.0-flash",           # Priority 5: Standard 2.0
+    "gemini-1.5-flash",           # Priority 6: Old Reliable
+    "gemini-1.5-pro",             # Priority 7: High Intelligence
+    "gemini-2.5-flash",           # Priority 8: (Currently Full/Throttled)
+    "gemini-pro"                  # Priority 9: Last Resort
 ]
 
 def generate_smart_fallback(prompt):
     """
-    Tries to generate content using models in the priority list.
-    Returns the text from the first successful model.
+    Iterates through the model list until one works.
+    This guarantees a response even if some models are rate-limited.
     """
     last_error = None
     for model_name in MODEL_PRIORITY:
         try:
+            # model = genai.GenerativeModel(model_name) # Uncomment to debug
             model = genai.GenerativeModel(model_name)
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
             last_error = e
-            continue 
-    return f"⚠️ System Busy: All AI models are currently overloaded. Please try again. (Error: {str(last_error)})"
+            continue # Silently try the next model
+    
+    # If every single model fails (unlikely), show this
+    return f"⚠️ System Busy: High traffic on all AI channels. Please wait 10s and try again. (Error: {str(last_error)})"
 
 # --- 3. TRANSLATION DICTIONARY ---
 TRANSLATIONS = {
@@ -82,7 +91,6 @@ TRANSLATIONS = {
         "privacy": "🛡️ Privacy Shield",
         "anonymize": "Anonymize Personal Data",
         "control_center": "Control Center",
-        # NEW KEYS FOR CRITICAL RISKS
         "lbl_analysis": "Analysis",
         "lbl_original": "Original Text",
         "lbl_rec": "Recommendation"
@@ -115,7 +123,6 @@ TRANSLATIONS = {
         "privacy": "🛡️ गोपनीयता कवच",
         "anonymize": "व्यक्तिगत डेटा छिपाएं",
         "control_center": "नियंत्रण केंद्र",
-        # NEW KEYS FOR CRITICAL RISKS
         "lbl_analysis": "विश्लेषण (Analysis)",
         "lbl_original": "मूल पाठ (Original Text)",
         "lbl_rec": "सुझाव (Recommendation)"
@@ -148,7 +155,6 @@ TRANSLATIONS = {
         "privacy": "🛡️ தனியுரிமை கவசம்",
         "anonymize": "தரவை மறைக்கவும்",
         "control_center": "கட்டுப்பாட்டு மையம்",
-        # NEW KEYS FOR CRITICAL RISKS
         "lbl_analysis": "பகுப்பாய்வு (Analysis)",
         "lbl_original": "அசல் உரை (Original)",
         "lbl_rec": "பரிந்துரை (Recommendation)"
@@ -168,15 +174,19 @@ def t(key):
 
 # --- 5. LANDING PAGE DESIGN ---
 def show_landing_page():
+    # Custom CSS for a SaaS-like look + ANIMATED BACKGROUND
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
         html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+        
+        /* TECH GRID BACKGROUND */
         [data-testid="stAppViewContainer"] {
             background-color: #f8fafc;
             background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
+        
         .main-title { 
             font-size: 4rem; font-weight: 900; color: #1E293B; line-height: 1.1; margin-bottom: 10px;
             background: -webkit-linear-gradient(45deg, #1e293b, #3b82f6);
@@ -198,7 +208,8 @@ def show_landing_page():
     with col1:
         st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True) 
         st.markdown('<h1 class="main-title">Legal Intelligence <br>Reimagined.</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 2.5 Flash</b>.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 2.5 Flash Lite</b>.</p>', unsafe_allow_html=True)
+        
         if st.button("🚀 Launch Dashboard", type="primary"):
             with st.spinner("Initializing Secure Environment..."):
                 time.sleep(1.2)
@@ -296,15 +307,16 @@ tab1, tab2, tab3 = st.tabs([t("nav_audit"), t("nav_chat"), t("nav_draft")])
 
 # --- TAB 1: AUDIT ---
 with tab1:
+    # --- PERSISTENCE LOGIC START ---
+    # If a document is already in memory, show the dashboard immediately.
+    # If NOT, show the uploader.
+    
     if 'doc_text' not in st.session_state:
+        # State 1: No Document Loaded
         st.markdown(f"""<div style="text-align: center; padding: 50px; border: 2px dashed #CBD5E1; border-radius: 12px; background-color: #F8FAFC;"><h3 style="color: #475569;">{t("upload_label")}</h3><p style="color: #94A3B8;">{t("upload_sub")}</p></div>""", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Upload Agreement", type=['pdf', 'docx'], label_visibility="collapsed")
-    else:
-        with st.expander(t("change_doc")):
-             uploaded_file = st.file_uploader("Upload New Agreement", type=['pdf', 'docx'])
-
-    if uploaded_file:
-        if 'doc_text' not in st.session_state or (uploaded_file.name != st.session_state.get('last_filename')):
+        
+        if uploaded_file:
             with st.spinner("Extracting text..."):
                 raw_text, error = DocumentParser.parse_file(uploaded_file)
                 if error:
@@ -312,9 +324,19 @@ with tab1:
                     st.stop()
                 st.session_state['doc_text'] = raw_text
                 st.session_state['last_filename'] = uploaded_file.name
-                st.session_state.pop('analysis_result', None)
-                st.toast("Document uploaded successfully!", icon="✅")
+                st.session_state.pop('analysis_result', None) 
                 st.rerun()
+    else:
+        # State 2: Document Loaded (Persistent Dashboard)
+        with st.expander(t("change_doc")):
+             new_file = st.file_uploader("Upload New Agreement", type=['pdf', 'docx'])
+             if new_file:
+                 raw_text, error = DocumentParser.parse_file(new_file)
+                 if not error:
+                     st.session_state['doc_text'] = raw_text
+                     st.session_state['last_filename'] = new_file.name
+                     st.session_state.pop('analysis_result', None)
+                     st.rerun()
 
         text_to_analyze = st.session_state['doc_text']
         if privacy_mode: text_to_analyze = anonymize_text(text_to_analyze)
@@ -363,12 +385,10 @@ with tab1:
                     st.success("No high-risk clauses detected.")
                 
                 for clause in res.get('clauses', []):
-                    # --- FIXED: CLAUSE TRANSLATION LOGIC ---
                     explanation = clause.get('explanation_english')
                     recommendation = clause.get('recommendation')
                     
                     if st.session_state.language != "English":
-                        # We do a combined translation call for speed
                         combined_prompt = f"""
                         Translate these two legal texts to {st.session_state.language}.
                         1. {explanation}
@@ -379,18 +399,17 @@ with tab1:
                         """
                         try:
                             trans_res = generate_smart_fallback(combined_prompt)
-                            # Simple parsing
                             if "Trans1:" in trans_res and "Trans2:" in trans_res:
                                 parts = trans_res.split("Trans2:")
                                 explanation = parts[0].replace("Trans1:", "").strip()
                                 recommendation = parts[1].strip()
                         except:
-                            pass # Fallback to English if parsing fails
+                            pass 
 
                     with st.expander(f"⚠️ {explanation[:60]}..."):
-                        st.markdown(f"**🔴 {t('lbl_analysis')}:** {explanation}")
-                        st.markdown(f"**📜 {t('lbl_original')}:**\n> *{clause.get('original_text')}*")
-                        st.markdown(f"**💡 {t('lbl_rec')}:** {recommendation}")
+                        st.markdown(f"**{t('lbl_analysis')}:** {explanation}")
+                        st.markdown(f"**{t('lbl_original')}:**\n> *{clause.get('original_text')}*")
+                        st.markdown(f"**{t('lbl_rec')}:** {recommendation}")
 
 # --- TAB 2: CHAT ---
 with tab2:
