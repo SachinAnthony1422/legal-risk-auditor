@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # --- AI LIBRARIES ---
 import google.generativeai as genai
 
-# Try importing OpenAI and Groq safely
+# Safe Imports for Backups
 try:
     from openai import OpenAI
 except ImportError:
@@ -25,10 +25,10 @@ from core.nlp_engine import LegalNLPEngine
 from core.risk_engine import LegalRiskEngine
 from utils.helpers import generate_pdf_report, generate_contract_pdf
 
-# Load Environment (For local .env file)
+# Load Environment
 load_dotenv()
 
-# --- 1. CONFIGURE AI CLIENTS ---
+# --- 1. CONFIGURE CLIENTS ---
 # Google Setup
 try:
     if os.getenv("GEMINI_API_KEY"):
@@ -36,11 +36,12 @@ try:
 except:
     pass
 
-# OpenAI Setup
+# OpenAI Setup (Auto-fix for your "OPEN_API_KEY" typo)
 openai_client = None
-if OpenAI and os.getenv("OPENAI_API_KEY"):
+key_openai = os.getenv("OPENAI_API_KEY") or os.getenv("OPEN_API_KEY")
+if OpenAI and key_openai:
     try:
-        openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        openai_client = OpenAI(api_key=key_openai)
     except:
         pass
 
@@ -60,45 +61,37 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 3. ULTIMATE HYBRID MODEL STRATEGY (CLEANED LIST) ---
-# Removed 'gemini-pro' to prevent 404 errors.
-# Prioritized models with high quota.
+# --- 3. ULTIMATE MODEL PRIORITY LIST ---
+# STRICTLY using the models found in your list + Backups.
 MODEL_PRIORITY = [
-    "gemini-2.5-flash-lite",      # 1. Google: High Quota (10 RPM)
-    "gemini-3-flash",             # 2. Google: Unused Quota (5 RPM)
-    "gpt-4o-mini",                # 3. OpenAI: Cheap & Fast
-    "llama3-70b-8192",            # 4. GROQ: Ultra Fast
-    "gemini-2.0-flash-lite",      # 5. Google: Stable Backup
-    "gemini-1.5-flash",           # 6. Google: Old Reliable
-    "gpt-4o",                     # 7. OpenAI: High Intelligence
-    "mixtral-8x7b-32768"          # 8. GROQ: Smart Backup
+    "gemini-2.5-flash-lite",      # 1. Google: Fastest & High Quota
+    "gemini-2.5-flash",           # 2. Google: Best Quality
+    "gpt-4o-mini",                # 3. OpenAI: Reliable Backup
+    "llama3-70b-8192",            # 4. Groq: Super Fast Backup
+    "gemini-2.0-flash-lite",      # 5. Google: Stable Previous Gen
+    "gemini-pro-latest",          # 6. Google: Valid Legacy Model (Found in your list)
+    "gemini-flash-latest",        # 7. Google: Valid Flash Model (Found in your list)
+    "gpt-4o",                     # 8. OpenAI: Heavy Duty
+    "mixtral-8x7b-32768"          # 9. Groq: Context Backup
 ]
 
 def generate_smart_fallback(prompt):
     """
-    Tries Google, OpenAI, and Groq in order until one succeeds.
+    Tries Google -> OpenAI -> Groq. 
+    Never crashes, just moves to the next model.
     """
     last_error = None
     
     for model_name in MODEL_PRIORITY:
         try:
-            # --- GOOGLE GEMINI LOGIC ---
+            # --- GOOGLE GEMINI ---
             if "gemini" in model_name:
                 if not os.getenv("GEMINI_API_KEY"): continue
                 model = genai.GenerativeModel(model_name)
                 response = model.generate_content(prompt)
                 return response.text
 
-            # --- GROQ LOGIC ---
-            elif "llama" in model_name or "mixtral" in model_name:
-                if not groq_client: continue
-                chat_completion = groq_client.chat.completions.create(
-                    messages=[{"role": "user", "content": prompt}],
-                    model=model_name,
-                )
-                return chat_completion.choices[0].message.content
-
-            # --- OPENAI GPT LOGIC ---
+            # --- OPENAI GPT ---
             elif "gpt" in model_name:
                 if not openai_client: continue
                 response = openai_client.chat.completions.create(
@@ -108,12 +101,21 @@ def generate_smart_fallback(prompt):
                 )
                 return response.choices[0].message.content
 
+            # --- GROQ ---
+            elif "llama" in model_name or "mixtral" in model_name:
+                if not groq_client: continue
+                chat_completion = groq_client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model=model_name,
+                )
+                return chat_completion.choices[0].message.content
+
         except Exception as e:
+            # Silently fail and try the next model
             last_error = e
-            # Don't wait too long if it fails, just move to the next provider
             continue 
     
-    return f"⚠️ System Busy: All AI channels are currently overloaded. Please wait 30 seconds and try again. (Last Error: {str(last_error)})"
+    return f"⚠️ System Busy: All AI channels (Google, OpenAI, Groq) are overloaded. Please check your API Keys in Secrets. (Error: {str(last_error)})"
 
 # --- 4. TRANSLATION DICTIONARY ---
 TRANSLATIONS = {
@@ -215,18 +217,17 @@ TRANSLATIONS = {
     }
 }
 
-# --- 5. SESSION STATE MANAGEMENT ---
+# --- 5. SESSION STATE ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
 if 'language' not in st.session_state:
     st.session_state.language = "English"
 
 def t(key):
-    """Helper function to get translated text based on selected language."""
     lang_dict = TRANSLATIONS.get(st.session_state.language, TRANSLATIONS["English"])
     return lang_dict.get(key, TRANSLATIONS["English"].get(key, key))
 
-# --- 6. LANDING PAGE DESIGN ---
+# --- 6. LANDING PAGE ---
 def show_landing_page():
     st.markdown("""
         <style>
@@ -357,7 +358,6 @@ tab1, tab2, tab3 = st.tabs([t("nav_audit"), t("nav_chat"), t("nav_draft")])
 
 # --- TAB 1: AUDIT ---
 with tab1:
-    # --- PERSISTENCE LOGIC START ---
     if 'doc_text' not in st.session_state:
         st.markdown(f"""<div style="text-align: center; padding: 50px; border: 2px dashed #CBD5E1; border-radius: 12px; background-color: #F8FAFC;"><h3 style="color: #475569;">{t("upload_label")}</h3><p style="color: #94A3B8;">{t("upload_sub")}</p></div>""", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Upload Agreement", type=['pdf', 'docx'], label_visibility="collapsed")
