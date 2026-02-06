@@ -27,11 +27,109 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. SESSION STATE MANAGEMENT ---
+# --- 2. TRANSLATION DICTIONARY ---
+TRANSLATIONS = {
+    "English": {
+        "nav_audit": "📊 Audit Dashboard",
+        "nav_chat": "🤖 Legal Chat",
+        "nav_draft": "📝 Drafter",
+        "upload_label": "Upload Agreement",
+        "upload_sub": "Upload a contract to begin the forensic audit.",
+        "change_doc": "📂 Change Document",
+        "run_audit": "🚀 Run Forensic Audit",
+        "analyzing": "🔍 Analyzing Contract...",
+        "risk_score": "Risk Score",
+        "clauses_flagged": "Clauses Flagged",
+        "jurisdiction": "Jurisdiction",
+        "actions": "Actions",
+        "download_report": "📥 Download PDF Report",
+        "exec_summary": "📋 Executive Summary",
+        "crit_risks": "🚩 Critical Risks",
+        "chat_placeholder": "Ask about notice periods, non-competes, etc...",
+        "draft_title": "📝 Smart Contract Drafter",
+        "draft_caption": "Generate legally binding agreements tailored for Indian Jurisdiction.",
+        "doc_type": "Document Type",
+        "party_1": "Party 1 (e.g., Company)",
+        "party_2": "Party 2 (e.g., Employee)",
+        "location": "Jurisdiction (City)",
+        "gen_draft": "✨ Generate Draft",
+        "download_contract": "📄 Download Contract PDF",
+        "privacy": "🛡️ Privacy Shield",
+        "anonymize": "Anonymize Personal Data",
+        "control_center": "Control Center"
+    },
+    "Hindi (हिंदी)": {
+        "nav_audit": "📊 ऑडिट डैशबोर्ड",
+        "nav_chat": "🤖 कानूनी चैट",
+        "nav_draft": "📝 ड्राफ्टर",
+        "upload_label": "समझौता अपलोड करें",
+        "upload_sub": "ऑडिट शुरू करने के लिए अनुबंध अपलोड करें।",
+        "change_doc": "📂 दस्तावेज़ बदलें",
+        "run_audit": "🚀 फोरेंसिक ऑडिट चलाएं",
+        "analyzing": "🔍 अनुबंध का विश्लेषण हो रहा है...",
+        "risk_score": "जोखिम स्कोर",
+        "clauses_flagged": "फ्लैग की गई धाराएं",
+        "jurisdiction": "अधिकार क्षेत्र",
+        "actions": "कार्रवाई",
+        "download_report": "📥 पीडीएफ रिपोर्ट डाउनलोड करें",
+        "exec_summary": "📋 कार्यकारी सारांश",
+        "crit_risks": "🚩 महत्वपूर्ण जोखिम",
+        "chat_placeholder": "नोटिस अवधि, गैर-प्रतिस्पर्धा आदि के बारे में पूछें...",
+        "draft_title": "📝 स्मार्ट अनुबंध ड्राफ्टर",
+        "draft_caption": "भारतीय अधिकार क्षेत्र के लिए कानूनी रूप से बाध्यकारी समझौते बनाएं।",
+        "doc_type": "दस्तावेज़ का प्रकार",
+        "party_1": "पक्ष 1 (जैसे, कंपनी)",
+        "party_2": "पक्ष 2 (जैसे, कर्मचारी)",
+        "location": "शहर (City)",
+        "gen_draft": "✨ ड्राफ्ट तैयार करें",
+        "download_contract": "📄 अनुबंध पीडीएफ डाउनलोड करें",
+        "privacy": "🛡️ गोपनीयता कवच",
+        "anonymize": "व्यक्तिगत डेटा छिपाएं",
+        "control_center": "नियंत्रण केंद्र"
+    },
+    "Tamil (தமிழ்)": {
+        "nav_audit": "📊 தணிக்கை குழு",
+        "nav_chat": "🤖 சட்ட அரட்டை",
+        "nav_draft": "📝 வரைவாளர்",
+        "upload_label": "ஒப்பந்தத்தை பதிவேற்றவும்",
+        "upload_sub": "தணிக்கையைத் தொடங்க ஒப்பந்தத்தைப் பதிவேற்றவும்.",
+        "change_doc": "📂 ஆவணத்தை மாற்றவும்",
+        "run_audit": "🚀 தடயவியல் தணிக்கையை இயக்கவும்",
+        "analyzing": "🔍 பகுப்பாய்வு செய்கிறது...",
+        "risk_score": "ஆபத்து மதிப்பெண்",
+        "clauses_flagged": "குறிக்கப்பட்ட விதிகள்",
+        "jurisdiction": "அதிகார வரம்பு",
+        "actions": "செயல்கள்",
+        "download_report": "📥 அறிக்கையைப் பதிவிறக்கவும்",
+        "exec_summary": "📋 நிர்வாகச் சுருக்கம்",
+        "crit_risks": "🚩 முக்கிய அபாயங்கள்",
+        "chat_placeholder": "அறிவிப்பு காலம் பற்றி கேட்கவும்...",
+        "draft_title": "📝 ஸ்மார்ட் ஒப்பந்த வரைவாளர்",
+        "draft_caption": "சட்டப்பூர்வ ஒப்பந்தங்களை உருவாக்கவும்.",
+        "doc_type": "ஆவண வகை",
+        "party_1": "தரப்பு 1 (எ.கா., நிறுவனம்)",
+        "party_2": "தரப்பு 2 (எ.கா., பணியாளர்)",
+        "location": "அதிகார வரம்பு",
+        "gen_draft": "✨ வரைவை உருவாக்குங்கள்",
+        "download_contract": "📄 ஒப்பந்தத்தைப் பதிவிறக்கவும்",
+        "privacy": "🛡️ தனியுரிமை கவசம்",
+        "anonymize": "தரவை மறைக்கவும்",
+        "control_center": "கட்டுப்பாட்டு மையம்"
+    }
+}
+
+# --- 3. SESSION STATE MANAGEMENT ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
+if 'language' not in st.session_state:
+    st.session_state.language = "English"
 
-# --- 3. LANDING PAGE DESIGN (Advanced UI/UX) ---
+def t(key):
+    """Helper function to get translated text based on selected language."""
+    lang_dict = TRANSLATIONS.get(st.session_state.language, TRANSLATIONS["English"])
+    return lang_dict.get(key, TRANSLATIONS["English"].get(key, key))
+
+# --- 4. LANDING PAGE DESIGN ---
 def show_landing_page():
     # Custom CSS for a SaaS-like look + ANIMATED BACKGROUND
     st.markdown("""
@@ -100,17 +198,15 @@ def show_landing_page():
         st.markdown('<h1 class="main-title">Legal Intelligence <br>Reimagined.</h1>', unsafe_allow_html=True)
         st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 1.5 Pro</b>.</p>', unsafe_allow_html=True)
         
-        # Call to Action Button with Logic
         if st.button("🚀 Launch Dashboard", type="primary"):
             with st.spinner("Initializing Secure Environment..."):
-                time.sleep(1.2)  # Professional loading effect
+                time.sleep(1.2)
                 st.session_state.page = 'app'
                 st.rerun()
                 
         st.markdown("<br><small>🔒 Enterprise-Grade Security • AES-256 Encryption</small>", unsafe_allow_html=True)
 
     with col2:
-        # Professional Hero Image (UPDATED TO LOCAL FILE)
         st.image("banner.png", use_container_width=True)
 
     st.markdown("---")
@@ -151,18 +247,17 @@ def show_landing_page():
     </div>
     """, unsafe_allow_html=True)
 
-# --- 4. PAGE ROUTING LOGIC ---
+# --- 5. PAGE ROUTING LOGIC ---
 if st.session_state.page == 'landing':
     show_landing_page()
-    st.stop()  # 🛑 STOPS HERE so the main app doesn't load yet
+    st.stop()
 
 # =========================================================
-# 🔻 MAIN APP LOGIC STARTS HERE (Only loads after click) 🔻
+# 🔻 MAIN APP LOGIC STARTS HERE 🔻
 # =========================================================
 
 # --- HELPER FUNCTIONS ---
 def create_gauge_chart(score):
-    """Draws a professional Risk Gauge."""
     color = "#22C55E" # Green
     if score > 40: color = "#F59E0B" # Orange
     if score > 75: color = "#EF4444" # Red
@@ -171,7 +266,7 @@ def create_gauge_chart(score):
         mode = "gauge+number",
         value = score,
         domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Risk Score", 'font': {'size': 24, 'color': "#64748B"}},
+        title = {'text': t("risk_score"), 'font': {'size': 24, 'color': "#64748B"}},
         number = {'font': {'size': 50, 'color': color, 'family': "Inter"}},
         gauge = {
             'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "white"},
@@ -189,21 +284,14 @@ def create_gauge_chart(score):
     return fig
 
 def anonymize_text(text):
-    """Simple PII redaction"""
     text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', "[REDACTED_EMAIL]", text)
     text = re.sub(r'\b\d{10}\b', "[REDACTED_PHONE]", text)
     return text
 
 # --- APP UI ---
-# Custom CSS for App Mode
 st.markdown("""
     <style>
-    /* SOFT BLUE BACKGROUND FOR APP */
-    [data-testid="stAppViewContainer"] {
-        background-color: #F8FAFC;
-    }
-    
-    /* Glassmorphism Header */
+    [data-testid="stAppViewContainer"] { background-color: #F8FAFC; }
     .main-header {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
@@ -216,8 +304,6 @@ st.markdown("""
         justify-content: space-between;
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
-    
-    /* Metrics Cards */
     .metric-container {
         background: white;
         border: 1px solid #E2E8F0;
@@ -231,7 +317,6 @@ st.markdown("""
     .metric-value { font-size: 28px; font-weight: 800; color: #1E293B; margin-top: 5px; }
     .metric-label { font-size: 14px; color: #64748B; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
     
-    /* Chat Bubbles */
     .chat-user { 
         background-color: #3B82F6; 
         color: white;
@@ -254,9 +339,6 @@ st.markdown("""
         max-width: 80%;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    .chat-container { overflow: auto; display: flex; flex-direction: column; }
-    
-    /* Tabs */
     .stTabs [data-baseweb="tab-list"] { gap: 8px; }
     .stTabs [data-baseweb="tab"] {
         height: 50px;
@@ -278,11 +360,21 @@ st.markdown("""
 # Sidebar
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2666/2666505.png", width=60)
-    st.markdown("### Control Center")
+    st.markdown(f"### {t('control_center')}")
     
     st.markdown("---")
-    st.markdown("**🛡️ Privacy Shield**")
-    privacy_mode = st.toggle("Anonymize Personal Data", value=False, help="Masks emails and phones before sending to AI.")
+    st.markdown("**🌍 Language / भाषा**")
+    # This widget drives the translations
+    selected_lang = st.selectbox(
+        "Select Output Language", 
+        ["English", "Hindi (हिंदी)", "Tamil (தமிழ்)"], 
+        label_visibility="collapsed"
+    )
+    st.session_state.language = selected_lang # Update Session State
+    
+    st.markdown("---")
+    st.markdown(f"**{t('privacy')}**")
+    privacy_mode = st.toggle(t("anonymize"), value=False)
     
     st.markdown("---")
     with st.container():
@@ -310,38 +402,36 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# TABS
-tab1, tab2, tab3 = st.tabs(["📊 Audit Dashboard", "🤖 Legal Chat", "📝 Drafter"])
+# TABS (Dynamic Titles)
+tab1, tab2, tab3 = st.tabs([t("nav_audit"), t("nav_chat"), t("nav_draft")])
 
 # ----------------------------------------------------
-# TAB 1: AUDIT DASHBOARD (Main Analysis)
+# TAB 1: AUDIT DASHBOARD
 # ----------------------------------------------------
 with tab1:
     if 'doc_text' not in st.session_state:
         # Empty State
-        st.markdown("""
+        st.markdown(f"""
         <div style="text-align: center; padding: 50px; border: 2px dashed #CBD5E1; border-radius: 12px; background-color: #F8FAFC;">
-            <h3 style="color: #475569;">No Document Uploaded</h3>
-            <p style="color: #94A3B8;">Upload a contract to begin the forensic audit.</p>
+            <h3 style="color: #475569;">{t("upload_label")}</h3>
+            <p style="color: #94A3B8;">{t("upload_sub")}</p>
         </div>
         """, unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Upload Agreement", type=['pdf', 'docx'], label_visibility="collapsed")
     else:
-        # Mini Uploader (to change file)
-        with st.expander("📂 Change Document"):
+        with st.expander(t("change_doc")):
              uploaded_file = st.file_uploader("Upload New Agreement", type=['pdf', 'docx'])
 
     if uploaded_file:
-        # 1. Parse
         if 'doc_text' not in st.session_state or (uploaded_file.name != st.session_state.get('last_filename')):
-            with st.spinner("Extracting text from document..."):
+            with st.spinner("Extracting text..."):
                 raw_text, error = DocumentParser.parse_file(uploaded_file)
                 if error:
                     st.error(error)
                     st.stop()
                 st.session_state['doc_text'] = raw_text
                 st.session_state['last_filename'] = uploaded_file.name
-                st.session_state.pop('analysis_result', None) # Clear old results
+                st.session_state.pop('analysis_result', None)
                 st.toast("Document uploaded successfully!", icon="✅")
                 st.rerun()
 
@@ -349,152 +439,135 @@ with tab1:
         if privacy_mode:
             text_to_analyze = anonymize_text(text_to_analyze)
 
-        # 2. Analyze Button (Centered)
         if 'analysis_result' not in st.session_state:
             st.markdown("<br>", unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1,2,1])
             with col2:
-                if st.button("🚀 Run Forensic Audit", type="primary", use_container_width=True):
+                if st.button(t("run_audit"), type="primary", use_container_width=True):
                     risk_engine = LegalRiskEngine()
-                    with st.status("🔍 Analyzing Contract...", expanded=True) as status:
-                        st.write("Scanning for liability clauses...")
-                        time.sleep(0.8)
-                        st.write("Checking compliance with Indian Contract Act...")
-                        time.sleep(0.8)
-                        st.write("Calculating Risk Score...")
+                    with st.status(t("analyzing"), expanded=True) as status:
+                        time.sleep(1)
                         result = risk_engine.analyze_contract(text_to_analyze)
                         st.session_state['analysis_result'] = result
-                        status.update(label="Audit Complete!", state="complete", expanded=False)
+                        status.update(label="Complete!", state="complete", expanded=False)
                     st.rerun()
 
-        # 3. Display Dashboard
         if 'analysis_result' in st.session_state:
             res = st.session_state['analysis_result']
             
-            # Top Metrics Row
+            # Metrics
             m1, m2, m3 = st.columns(3)
-            m1.markdown(f"<div class='metric-container'><div class='metric-label'>Risk Score</div><div class='metric-value' style='color: {'#EF4444' if res['overall_score'] > 70 else '#22C55E'}'>{res.get('overall_score')}/100</div></div>", unsafe_allow_html=True)
-            m2.markdown(f"<div class='metric-container'><div class='metric-label'>Clauses Flagged</div><div class='metric-value'>{len(res.get('clauses', []))}</div></div>", unsafe_allow_html=True)
-            m3.markdown(f"<div class='metric-container'><div class='metric-label'>Jurisdiction</div><div class='metric-value'>India 🇮🇳</div></div>", unsafe_allow_html=True)
+            m1.markdown(f"<div class='metric-container'><div class='metric-label'>{t('risk_score')}</div><div class='metric-value' style='color: {'#EF4444' if res['overall_score'] > 70 else '#22C55E'}'>{res.get('overall_score')}/100</div></div>", unsafe_allow_html=True)
+            m2.markdown(f"<div class='metric-container'><div class='metric-label'>{t('clauses_flagged')}</div><div class='metric-value'>{len(res.get('clauses', []))}</div></div>", unsafe_allow_html=True)
+            m3.markdown(f"<div class='metric-container'><div class='metric-label'>{t('jurisdiction')}</div><div class='metric-value'>India 🇮🇳</div></div>", unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
-
-            # Main Layout
             c_left, c_right = st.columns([1, 2], gap="medium")
             
             with c_left:
-                st.markdown("### Risk Meter")
+                st.markdown(f"### {t('risk_score')}")
                 st.plotly_chart(create_gauge_chart(res.get('overall_score')), use_container_width=True)
                 
-                st.markdown("### Actions")
+                st.markdown(f"### {t('actions')}")
                 official = st.checkbox("Official Report Mode")
                 report_data = generate_pdf_report(res, is_draft=not official)
-                st.download_button("📥 Download PDF Report", data=report_data, file_name="Audit_Report.pdf", mime="application/pdf", use_container_width=True)
+                st.download_button(t("download_report"), data=report_data, file_name="Audit_Report.pdf", mime="application/pdf", use_container_width=True)
 
             with c_right:
-                st.markdown("### 📋 Executive Summary")
-                st.info(res.get('summary_english'))
+                st.markdown(f"### {t('exec_summary')}")
                 
-                st.markdown("### 🚩 Critical Risks")
+                # Multilingual Summary Logic
+                summary_text = res.get('summary_english')
+                if st.session_state.language != "English":
+                    with st.spinner(f"Translating to {st.session_state.language}..."):
+                         try:
+                             t_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                             summary_text = t_model.generate_content(f"Translate this legal summary to {st.session_state.language}: {summary_text}").text
+                         except:
+                             st.warning("Translation failed, showing English.")
+                
+                st.info(summary_text)
+                
+                st.markdown(f"### {t('crit_risks')}")
                 if not res.get('clauses'):
-                    st.success("No high-risk clauses detected. This contract looks safe!")
+                    st.success("No high-risk clauses detected.")
                 
                 for clause in res.get('clauses', []):
                     with st.expander(f"⚠️ {clause.get('explanation_english')[:60]}..."):
-                        st.markdown(f"**🔴 Risk Analysis:** {clause.get('explanation_english')}")
-                        st.markdown(f"**📜 Original Text:**\n> *{clause.get('original_text')}*")
+                        st.markdown(f"**🔴 Analysis:** {clause.get('explanation_english')}")
+                        st.markdown(f"**📜 Original:**\n> *{clause.get('original_text')}*")
                         st.markdown(f"**💡 Recommendation:** {clause.get('recommendation')}")
 
 # ----------------------------------------------------
-# TAB 2: AI ASSISTANT (Modern Chat)
+# TAB 2: CHAT
 # ----------------------------------------------------
 with tab2:
-    st.markdown("### 🤖 Legal Assistant")
+    st.markdown(f"### {t('nav_chat')}")
     
     if 'doc_text' in st.session_state:
-        # Initialize chat history
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Container for chat history
         chat_container = st.container()
         
         with chat_container:
             for message in st.session_state.messages:
                 role_class = "chat-user" if message["role"] == "user" else "chat-ai"
-                st.markdown(f"""
-                <div style="overflow: hidden;">
-                    <div class='{role_class}'>{message['content']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(f"<div style='overflow: hidden;'><div class='{role_class}'>{message['content']}</div></div>", unsafe_allow_html=True)
 
-        # Chat Input
-        if prompt := st.chat_input("Ask about notice periods, non-competes, etc..."):
-            # Add user message
+        if prompt := st.chat_input(t("chat_placeholder")):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with chat_container:
                 st.markdown(f"<div style='overflow: hidden;'><div class='chat-user'>{prompt}</div></div>", unsafe_allow_html=True)
 
-            # Generate Answer
-            with st.spinner("Consulting legal database..."):
+            with st.spinner("Thinking..."):
                 try:
                     model = genai.GenerativeModel('gemini-2.0-flash-exp')
-                    context = st.session_state['doc_text'][:30000] # Limit context
-                    ai_prompt = f"Context: {context}\n\nQuestion: {prompt}\n\nAnswer based ONLY on the context above. Keep it legal but simple."
+                    context = st.session_state['doc_text'][:30000]
+                    ai_prompt = f"Context: {context}\n\nQuestion: {prompt}\n\nAnswer based ONLY on the context. Answer in {st.session_state.language} language."
                     response = model.generate_content(ai_prompt)
                     ans = response.text
-                except Exception as e:
-                    ans = "I'm sorry, I couldn't process that request right now. (Model Error)"
+                except:
+                    ans = "Error processing request."
 
-            # Add AI message
             st.session_state.messages.append({"role": "assistant", "content": ans})
             st.rerun()
     else:
-        st.warning("⚠️ Please upload a document in the 'Audit Dashboard' tab first.")
+        st.warning(f"⚠️ {t('upload_sub')}")
 
 # ----------------------------------------------------
-# TAB 3: CONTRACT DRAFTER
+# TAB 3: DRAFTER
 # ----------------------------------------------------
 with tab3:
-    st.markdown("### 📝 Smart Contract Drafter")
-    st.caption("Generate legally binding agreements tailored for Indian Jurisdiction.")
+    st.markdown(f"### {t('draft_title')}")
+    st.caption(t("draft_caption"))
     
     with st.container():
-        st.markdown("<div style='background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
+        st.markdown("<div style='background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0;'>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
-            doc_type = st.selectbox("Document Type", ["NDA", "Employment Agreement", "Freelance Contract", "Lease Deed"])
-            p1 = st.text_input("Party 1 (e.g., Company Name)")
+            doc_type = st.selectbox(t("doc_type"), ["NDA", "Employment Agreement", "Freelance Contract", "Lease Deed"])
+            p1 = st.text_input(t("party_1"))
         with c2:
-            loc = st.selectbox("Jurisdiction", ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai"])
-            p2 = st.text_input("Party 2 (e.g., Employee Name)")
+            loc = st.selectbox(t("location"), ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai"])
+            p2 = st.text_input(t("party_2"))
         st.markdown("</div>", unsafe_allow_html=True)
         
     st.markdown("<br>", unsafe_allow_html=True)
     
-    if st.button("✨ Generate Draft", type="primary"):
+    if st.button(t("gen_draft"), type="primary"):
         if p1 and p2:
-            with st.spinner("Drafting legal document..."):
+            with st.spinner("Drafting..."):
                 try:
                     model = genai.GenerativeModel('gemini-2.0-flash-exp')
-                    d_prompt = f"Draft a professional {doc_type} between {p1} and {p2} for {loc}, India. Use clear professional legal language. Do NOT use markdown bolding (like **text**), use CAPITALIZATION for headers instead."
-                    
+                    d_prompt = f"Draft a professional {doc_type} between {p1} and {p2} for {loc}, India. Draft in {st.session_state.language} language. Use professional legal terminology."
                     res = model.generate_content(d_prompt)
                     clean_draft = res.text.replace("**", "")
                     
-                    # Show
                     st.text_area("Generated Draft", clean_draft, height=500)
-                    
-                    # PDF Download
                     pdf_bytes = generate_contract_pdf(clean_draft)
-                    st.download_button(
-                        label="📄 Download Contract PDF",
-                        data=pdf_bytes,
-                        file_name=f"{doc_type.replace(' ', '_')}_Draft.pdf",
-                        mime="application/pdf"
-                    )
-                    
+                    st.download_button(t("download_contract"), data=pdf_bytes, file_name="Draft.pdf", mime="application/pdf")
                 except Exception as e:
                     st.error(f"Error: {e}")
         else:
-            st.error("⚠️ Please enter both Party Names to generate a contract.")
+            st.error("⚠️ Please enter details.")

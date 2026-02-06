@@ -96,3 +96,40 @@ The system is built to process unstructured legal data, including:
 ```bash
 git clone [https://github.com/SachinAnthony1422/legal-risk-auditor.git](https://github.com/SachinAnthony1422/legal-risk-auditor.git)
 cd legal-risk-auditor
+
+### 3️⃣ Configure API Key
+Create a .env file in the root directory and add your key:
+```bash
+GEMINI_API_KEY="your_api_key_here"
+
+### 4️⃣ Run Streamlit App
+```bash
+streamlit run main.py
+
+---
+
+🔗 Access the App: Open http://localhost:8501 in your browser.
+
+---
+
+##💡 **Usage Guide**
+
+1. **Upload:** Drag & drop any legal contract (PDF) on the "Audit Dashboard".
+
+2. **Analyze:** Click "Run Forensic Audit" to generate the Risk Score.
+
+3. **Chat:** Switch to "Legal Chat" to ask questions like "Is the notice period fair?".
+
+4. **Draft:** Use the "Drafter" tab to generate new agreements instantly.
+
+---
+
+##🔮 **Future Enhancements**
+
+1. **☁ Cloud Storage:** Integration with AWS S3/Google Drive for document history.
+
+2. **🧠 Multi-Modal Analysis:** OCR support for handwritten signatures/notes.
+
+3. **📊 Contract Comparison:** Diff-checker for Version A vs. Version B.
+
+4. **🎨 Regional Language Support:** Hindi/Tamil legal translation.
