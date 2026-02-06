@@ -27,39 +27,40 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. ROBUST MODEL FALLBACK SYSTEM (THE "KITCHEN SINK" STRATEGY) ---
-# PRIORITY: We put "Lite" models first because your log shows they have available quota (2/10).
-# Standard "Flash" is at the bottom because it is currently full (5/5).
+# --- 2. ROBUST MODEL FALLBACK SYSTEM (OPTIMIZED FOR YOUR QUOTA) ---
+# Based on your dashboard image:
+# 1. Gemini 2.5 Flash Lite (Has capacity: 6/10)
+# 2. Gemini 3 Flash (Empty: 0/5) - Great backup
+# 3. Gemini 2.0 Flash Lite (Reliable backup)
+# 4. Gemini 2.5 Flash (Moved to bottom because it's full: 5/5)
 MODEL_PRIORITY = [
-    "gemini-2.5-flash-lite",      # Priority 1: High Quota & Fast
-    "gemini-2.0-flash-lite",      # Priority 2: Backup Speedster
-    "gemini-2.0-flash-lite-001",  # Priority 3: Specific Version
-    "gemini-flash-lite-latest",   # Priority 4: Alias
-    "gemini-2.0-flash",           # Priority 5: Standard 2.0
-    "gemini-1.5-flash",           # Priority 6: Old Reliable
-    "gemini-1.5-pro",             # Priority 7: High Intelligence
-    "gemini-2.5-flash",           # Priority 8: (Currently Full/Throttled)
-    "gemini-pro"                  # Priority 9: Last Resort
+    "gemini-2.5-flash-lite",      # Priority 1: Best available quota
+    "gemini-3-flash",             # Priority 2: New & Empty quota
+    "gemini-2.0-flash-lite",      # Priority 3: Fast backup
+    "gemini-1.5-flash",           # Priority 4: Old Reliable
+    "gemini-2.5-flash",           # Priority 5: Currently Full (Use as last resort)
+    "gemini-1.5-pro",             # Priority 6: Slower but smart
+    "gemini-pro"                  # Priority 7: Legacy
 ]
 
 def generate_smart_fallback(prompt):
     """
     Iterates through the model list until one works.
-    This guarantees a response even if some models are rate-limited.
+    Includes a small delay to handle 'Busy' signals.
     """
     last_error = None
     for model_name in MODEL_PRIORITY:
         try:
-            # model = genai.GenerativeModel(model_name) # Uncomment to debug
+            # st.toast(f"Attempting with {model_name}...", icon="🤖") # Uncomment for debugging
             model = genai.GenerativeModel(model_name)
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
             last_error = e
-            continue # Silently try the next model
+            time.sleep(0.5) # Brief pause to let API breathe
+            continue 
     
-    # If every single model fails (unlikely), show this
-    return f"⚠️ System Busy: High traffic on all AI channels. Please wait 10s and try again. (Error: {str(last_error)})"
+    return f"⚠️ System Busy. Please wait 10s. (Details: {str(last_error)})"
 
 # --- 3. TRANSLATION DICTIONARY ---
 TRANSLATIONS = {
@@ -174,19 +175,15 @@ def t(key):
 
 # --- 5. LANDING PAGE DESIGN ---
 def show_landing_page():
-    # Custom CSS for a SaaS-like look + ANIMATED BACKGROUND
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
         html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-        
-        /* TECH GRID BACKGROUND */
         [data-testid="stAppViewContainer"] {
             background-color: #f8fafc;
             background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
             background-size: 40px 40px;
         }
-        
         .main-title { 
             font-size: 4rem; font-weight: 900; color: #1E293B; line-height: 1.1; margin-bottom: 10px;
             background: -webkit-linear-gradient(45deg, #1e293b, #3b82f6);
@@ -308,11 +305,7 @@ tab1, tab2, tab3 = st.tabs([t("nav_audit"), t("nav_chat"), t("nav_draft")])
 # --- TAB 1: AUDIT ---
 with tab1:
     # --- PERSISTENCE LOGIC START ---
-    # If a document is already in memory, show the dashboard immediately.
-    # If NOT, show the uploader.
-    
     if 'doc_text' not in st.session_state:
-        # State 1: No Document Loaded
         st.markdown(f"""<div style="text-align: center; padding: 50px; border: 2px dashed #CBD5E1; border-radius: 12px; background-color: #F8FAFC;"><h3 style="color: #475569;">{t("upload_label")}</h3><p style="color: #94A3B8;">{t("upload_sub")}</p></div>""", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Upload Agreement", type=['pdf', 'docx'], label_visibility="collapsed")
         
@@ -327,7 +320,6 @@ with tab1:
                 st.session_state.pop('analysis_result', None) 
                 st.rerun()
     else:
-        # State 2: Document Loaded (Persistent Dashboard)
         with st.expander(t("change_doc")):
              new_file = st.file_uploader("Upload New Agreement", type=['pdf', 'docx'])
              if new_file:
@@ -388,6 +380,7 @@ with tab1:
                     explanation = clause.get('explanation_english')
                     recommendation = clause.get('recommendation')
                     
+                    # --- TRANSLATION FIX FOR CRITICAL RISKS ---
                     if st.session_state.language != "English":
                         combined_prompt = f"""
                         Translate these two legal texts to {st.session_state.language}.
