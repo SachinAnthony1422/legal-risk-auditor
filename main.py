@@ -481,10 +481,11 @@ with tab1:
                 if st.session_state.language != "English":
                     with st.spinner(f"Translating to {st.session_state.language}..."):
                          try:
-                             t_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                             # UPDATED MODEL NAME TO STABLE VERSION
+                             t_model = genai.GenerativeModel('gemini-1.5-pro')
                              summary_text = t_model.generate_content(f"Translate this legal summary to {st.session_state.language}: {summary_text}").text
-                         except:
-                             st.warning("Translation failed, showing English.")
+                         except Exception as e:
+                             st.warning(f"Translation failed: {e}")
                 
                 st.info(summary_text)
                 
@@ -522,7 +523,8 @@ with tab2:
 
             with st.spinner("Thinking..."):
                 try:
-                    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                    # UPDATED MODEL NAME TO STABLE VERSION
+                    model = genai.GenerativeModel('gemini-1.5-pro')
                     context = st.session_state['doc_text'][:30000]
                     ai_prompt = f"Context: {context}\n\nQuestion: {prompt}\n\nAnswer based ONLY on the context. Answer in {st.session_state.language} language."
                     response = model.generate_content(ai_prompt)
@@ -559,7 +561,8 @@ with tab3:
         if p1 and p2:
             with st.spinner("Drafting..."):
                 try:
-                    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                    # UPDATED MODEL NAME TO STABLE VERSION
+                    model = genai.GenerativeModel('gemini-1.5-pro')
                     d_prompt = f"Draft a professional {doc_type} between {p1} and {p2} for {loc}, India. Draft in {st.session_state.language} language. Use professional legal terminology."
                     res = model.generate_content(d_prompt)
                     clean_draft = res.text.replace("**", "")
