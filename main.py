@@ -27,7 +27,36 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. TRANSLATION DICTIONARY ---
+# --- 2. ROBUST MODEL FALLBACK SYSTEM (UPDATED WITH YOUR MODELS) ---
+# This list defines the priority order based on your available models.
+MODEL_PRIORITY = [
+    "gemini-2.5-flash",       # Priority 1: The Cutting Edge (Fast & Smart)
+    "gemini-2.0-flash",       # Priority 2: Reliable Standard
+    "gemini-2.0-flash-lite",  # Priority 3: Ultra-Fast Backup
+    "gemini-2.5-pro",         # Priority 4: High Intelligence Backup
+    "gemini-pro-latest"       # Priority 5: Safety Net
+]
+
+def generate_smart_fallback(prompt):
+    """
+    Tries to generate content using models in the priority list.
+    Returns the text from the first successful model.
+    """
+    last_error = None
+    for model_name in MODEL_PRIORITY:
+        try:
+            # st.toast(f"Using AI Model: {model_name}", icon="🤖") # Optional: Show which model is working
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            last_error = e
+            continue # Try the next model in the list
+    
+    # If all fail, return a safe error message
+    return f"⚠️ System Busy: All AI models are currently overloaded. Please try again. (Error: {str(last_error)})"
+
+# --- 3. TRANSLATION DICTIONARY ---
 TRANSLATIONS = {
     "English": {
         "nav_audit": "📊 Audit Dashboard",
@@ -118,7 +147,7 @@ TRANSLATIONS = {
     }
 }
 
-# --- 3. SESSION STATE MANAGEMENT ---
+# --- 4. SESSION STATE MANAGEMENT ---
 if 'page' not in st.session_state:
     st.session_state.page = 'landing'
 if 'language' not in st.session_state:
@@ -129,7 +158,7 @@ def t(key):
     lang_dict = TRANSLATIONS.get(st.session_state.language, TRANSLATIONS["English"])
     return lang_dict.get(key, TRANSLATIONS["English"].get(key, key))
 
-# --- 4. LANDING PAGE DESIGN ---
+# --- 5. LANDING PAGE DESIGN ---
 def show_landing_page():
     # Custom CSS for a SaaS-like look + ANIMATED BACKGROUND
     st.markdown("""
@@ -196,7 +225,7 @@ def show_landing_page():
     with col1:
         st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True) # Spacer
         st.markdown('<h1 class="main-title">Legal Intelligence <br>Reimagined.</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 2.0 Flash</b>.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 2.5 Flash</b>.</p>', unsafe_allow_html=True)
         
         if st.button("🚀 Launch Dashboard", type="primary"):
             with st.spinner("Initializing Secure Environment..."):
@@ -247,7 +276,7 @@ def show_landing_page():
     </div>
     """, unsafe_allow_html=True)
 
-# --- 5. PAGE ROUTING LOGIC ---
+# --- 6. PAGE ROUTING LOGIC ---
 if st.session_state.page == 'landing':
     show_landing_page()
     st.stop()
@@ -476,16 +505,13 @@ with tab1:
             with c_right:
                 st.markdown(f"### {t('exec_summary')}")
                 
-                # Multilingual Summary Logic
+                # Multilingual Summary Logic using FALLBACK
                 summary_text = res.get('summary_english')
                 if st.session_state.language != "English":
                     with st.spinner(f"Translating to {st.session_state.language}..."):
-                         try:
-                             # UPDATED TO gemini-2.0-flash (Available in your list)
-                             t_model = genai.GenerativeModel('gemini-2.0-flash')
-                             summary_text = t_model.generate_content(f"Translate this legal summary to {st.session_state.language}: {summary_text}").text
-                         except Exception as e:
-                             st.warning(f"Translation failed: {e}")
+                         # USE THE FALLBACK FUNCTION HERE
+                         t_prompt = f"Translate this legal summary to {st.session_state.language}: {summary_text}"
+                         summary_text = generate_smart_fallback(t_prompt)
                 
                 st.info(summary_text)
                 
@@ -522,15 +548,10 @@ with tab2:
                 st.markdown(f"<div style='overflow: hidden;'><div class='chat-user'>{prompt}</div></div>", unsafe_allow_html=True)
 
             with st.spinner("Thinking..."):
-                try:
-                    # UPDATED TO gemini-2.0-flash (Available in your list)
-                    model = genai.GenerativeModel('gemini-2.0-flash')
-                    context = st.session_state['doc_text'][:30000]
-                    ai_prompt = f"Context: {context}\n\nQuestion: {prompt}\n\nAnswer based ONLY on the context. Answer in {st.session_state.language} language."
-                    response = model.generate_content(ai_prompt)
-                    ans = response.text
-                except:
-                    ans = "Error processing request."
+                context = st.session_state['doc_text'][:30000]
+                ai_prompt = f"Context: {context}\n\nQuestion: {prompt}\n\nAnswer based ONLY on the context. Answer in {st.session_state.language} language."
+                # USE THE FALLBACK FUNCTION HERE
+                ans = generate_smart_fallback(ai_prompt)
 
             st.session_state.messages.append({"role": "assistant", "content": ans})
             st.rerun()
@@ -560,17 +581,13 @@ with tab3:
     if st.button(t("gen_draft"), type="primary"):
         if p1 and p2:
             with st.spinner("Drafting..."):
-                try:
-                    # UPDATED TO gemini-2.0-flash (Available in your list)
-                    model = genai.GenerativeModel('gemini-2.0-flash')
-                    d_prompt = f"Draft a professional {doc_type} between {p1} and {p2} for {loc}, India. Draft in {st.session_state.language} language. Use professional legal terminology."
-                    res = model.generate_content(d_prompt)
-                    clean_draft = res.text.replace("**", "")
-                    
-                    st.text_area("Generated Draft", clean_draft, height=500)
-                    pdf_bytes = generate_contract_pdf(clean_draft)
-                    st.download_button(t("download_contract"), data=pdf_bytes, file_name="Draft.pdf", mime="application/pdf")
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                d_prompt = f"Draft a professional {doc_type} between {p1} and {p2} for {loc}, India. Draft in {st.session_state.language} language. Use professional legal terminology."
+                # USE THE FALLBACK FUNCTION HERE
+                res_text = generate_smart_fallback(d_prompt)
+                clean_draft = res_text.replace("**", "")
+                
+                st.text_area("Generated Draft", clean_draft, height=500)
+                pdf_bytes = generate_contract_pdf(clean_draft)
+                st.download_button(t("download_contract"), data=pdf_bytes, file_name="Draft.pdf", mime="application/pdf")
         else:
             st.error("⚠️ Please enter details.")
