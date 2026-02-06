@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 # --- AI LIBRARIES ---
 import google.generativeai as genai
-# Import OpenAI and Groq libraries. 
-# We use try-except to prevent crashes if libraries aren't installed yet.
+
+# Try importing OpenAI and Groq safely
 try:
     from openai import OpenAI
 except ImportError:
@@ -60,17 +60,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 3. ULTIMATE HYBRID MODEL STRATEGY ---
-# Priority: High-Quota Gemini -> Free/Fast Groq -> Paid/Credit OpenAI -> Gemini Backups
+# --- 3. ULTIMATE HYBRID MODEL STRATEGY (CLEANED LIST) ---
+# Removed 'gemini-pro' to prevent 404 errors.
+# Prioritized models with high quota.
 MODEL_PRIORITY = [
-    "gemini-2.5-flash-lite",      # 1. Google: High Quota & Fast
-    "gemini-3-flash",             # 2. Google: Backup (Unused Quota)
-    "llama3-70b-8192",            # 3. GROQ: Fast & Free Tier
-    "gpt-4o-mini",                # 4. OpenAI: Reliable & Cheap
+    "gemini-2.5-flash-lite",      # 1. Google: High Quota (10 RPM)
+    "gemini-3-flash",             # 2. Google: Unused Quota (5 RPM)
+    "gpt-4o-mini",                # 3. OpenAI: Cheap & Fast
+    "llama3-70b-8192",            # 4. GROQ: Ultra Fast
     "gemini-2.0-flash-lite",      # 5. Google: Stable Backup
-    "mixtral-8x7b-32768",         # 6. GROQ: Smart Backup
-    "gpt-4o",                     # 7. OpenAI: Heavy Duty Backup
-    "gemini-1.5-flash"            # 8. Google: Last Resort
+    "gemini-1.5-flash",           # 6. Google: Old Reliable
+    "gpt-4o",                     # 7. OpenAI: High Intelligence
+    "mixtral-8x7b-32768"          # 8. GROQ: Smart Backup
 ]
 
 def generate_smart_fallback(prompt):
@@ -109,10 +110,10 @@ def generate_smart_fallback(prompt):
 
         except Exception as e:
             last_error = e
-            time.sleep(0.5) # Brief pause before switching providers
+            # Don't wait too long if it fails, just move to the next provider
             continue 
     
-    return f"⚠️ System Busy: All AI services (Google, OpenAI, Groq) are unreachable. (Error: {str(last_error)})"
+    return f"⚠️ System Busy: All AI channels are currently overloaded. Please wait 30 seconds and try again. (Last Error: {str(last_error)})"
 
 # --- 4. TRANSLATION DICTIONARY ---
 TRANSLATIONS = {
@@ -432,7 +433,6 @@ with tab1:
                     explanation = clause.get('explanation_english')
                     recommendation = clause.get('recommendation')
                     
-                    # --- TRANSLATION FIX FOR CRITICAL RISKS ---
                     if st.session_state.language != "English":
                         combined_prompt = f"""
                         Translate these two legal texts to {st.session_state.language}.
