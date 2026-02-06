@@ -100,9 +100,9 @@ def show_landing_page():
         st.markdown("<br><small>🔒 Enterprise-Grade Security • AES-256 Encryption</small>", unsafe_allow_html=True)
 
     with col2:
-        # Professional Hero Image
-        st.image("https://cdn.dribbble.com/users/508588/screenshots/16205837/media/d93563919e1a0b380313543d4f826359.jpg", use_container_width=True)
-
+        # Professional Hero Image (UPDATED TO LOCAL FILE)
+        st.image("banner.png", use_container_width=True)
+        
     st.markdown("---")
 
     # --- FEATURES GRID ---
