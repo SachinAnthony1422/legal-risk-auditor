@@ -196,7 +196,7 @@ def show_landing_page():
     with col1:
         st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True) # Spacer
         st.markdown('<h1 class="main-title">Legal Intelligence <br>Reimagined.</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 1.5 Pro</b>.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-title">Automate contract review, detect hidden risks, and draft airtight agreements in seconds with <b>Gemini 2.0 Flash</b>.</p>', unsafe_allow_html=True)
         
         if st.button("🚀 Launch Dashboard", type="primary"):
             with st.spinner("Initializing Secure Environment..."):
@@ -481,8 +481,8 @@ with tab1:
                 if st.session_state.language != "English":
                     with st.spinner(f"Translating to {st.session_state.language}..."):
                          try:
-                             # UPDATED TO gemini-1.5-flash FOR RELIABILITY
-                             t_model = genai.GenerativeModel('gemini-1.5-flash')
+                             # UPDATED TO gemini-2.0-flash (Available in your list)
+                             t_model = genai.GenerativeModel('gemini-2.0-flash')
                              summary_text = t_model.generate_content(f"Translate this legal summary to {st.session_state.language}: {summary_text}").text
                          except Exception as e:
                              st.warning(f"Translation failed: {e}")
@@ -523,8 +523,8 @@ with tab2:
 
             with st.spinner("Thinking..."):
                 try:
-                    # UPDATED TO gemini-1.5-flash FOR RELIABILITY
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    # UPDATED TO gemini-2.0-flash (Available in your list)
+                    model = genai.GenerativeModel('gemini-2.0-flash')
                     context = st.session_state['doc_text'][:30000]
                     ai_prompt = f"Context: {context}\n\nQuestion: {prompt}\n\nAnswer based ONLY on the context. Answer in {st.session_state.language} language."
                     response = model.generate_content(ai_prompt)
@@ -561,8 +561,8 @@ with tab3:
         if p1 and p2:
             with st.spinner("Drafting..."):
                 try:
-                    # UPDATED TO gemini-1.5-flash FOR RELIABILITY
-                    model = genai.GenerativeModel('gemini-1.5-flash')
+                    # UPDATED TO gemini-2.0-flash (Available in your list)
+                    model = genai.GenerativeModel('gemini-2.0-flash')
                     d_prompt = f"Draft a professional {doc_type} between {p1} and {p2} for {loc}, India. Draft in {st.session_state.language} language. Use professional legal terminology."
                     res = model.generate_content(d_prompt)
                     clean_draft = res.text.replace("**", "")
